@@ -129,31 +129,6 @@ receivers:
             enabled: true
 exporters:
   debug:
-  otlp_grpc/jaeger:
-    endpoint: "jaeger:4317"
-    tls:
-      insecure: true
-    sending_queue:
-      batch:
-  otlp_http/prometheus:
-    endpoint: "http://prometheus:9090/api/v1/otlp"
-    tls:
-      insecure: true
-    sending_queue:
-      batch:
-  opensearch:
-    logs_index: otel-logs
-    logs_index_time_format: "yyyy-MM-dd"
-    http:
-      endpoint: "http://opensearch:9200"
-      tls:
-        insecure: true
-    sending_queue:
-      batch:
-  otlp_grpc/firepit:
-    endpoint: "firepit:4317"
-    tls:
-      insecure: true
 processors:
   memory_limiter:
     check_interval: 5s
@@ -230,33 +205,26 @@ service:
     traces:
       receivers: [otlp]
       processors: [resourcedetection, memory_limiter, transform/sanitize_spans]
-      exporters: [otlp_grpc/jaeger, debug, span_metrics]
     metrics:
       receivers: [docker_stats, http_check/frontend-proxy, host_metrics, nginx, otlp, postgresql, redis, span_metrics, kafkametrics]
       processors: [resourcedetection, memory_limiter]
-      exporters: [otlp_http/prometheus, debug]
     logs:
       receivers: [otlp]
       processors: [resourcedetection, memory_limiter, transform/sanitize_logs]
-      exporters: [opensearch, debug]
-    profiles:
-      receivers: [otlp]
-      processors: [filter/sanitize_profiles, memory_limiter]
-      exporters: [otlp_grpc/firepit, debug]
-  telemetry:
-    metrics:
-      readers:
-        - periodic:
-            exporter:
-              otlp:
-                protocol: http/protobuf
-                # replace with your observability meta monitoring backend
-                endpoint: http://${env:OTEL_COLLECTOR_HOST}:${env:OTEL_COLLECTOR_PORT_HTTP}
-    logs:
-      processors:
-        - batch:
-            exporter:
-              otlp:
-                protocol: http/protobuf
-                # replace with your observability meta monitoring backend
-                endpoint: http://${env:OTEL_COLLECTOR_HOST}:${env:OTEL_COLLECTOR_PORT_HTTP}
+#  telemetry:
+#    metrics:
+#      readers:
+#        - periodic:
+#            exporter:
+#              otlp:
+#                protocol: http/protobuf
+#                # replace with your observability meta monitoring backend
+#                endpoint: http://${env:OTEL_COLLECTOR_HOST}:${env:OTEL_COLLECTOR_PORT_HTTP}
+#    logs:
+#      processors:
+#        - batch:
+#            exporter:
+#              otlp:
+#                protocol: http/protobuf
+#                # replace with your observability meta monitoring backend
+#                endpoint: http://${env:OTEL_COLLECTOR_HOST}:${env:OTEL_COLLECTOR_PORT_HTTP}

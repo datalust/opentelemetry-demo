@@ -43,14 +43,6 @@ static_resources:
                           route: { cluster: loadgen, prefix_rewrite: "/" }
                         - match: { prefix: "/otlp-http/" }
                           route: { cluster: opentelemetry_collector_http, prefix_rewrite: "/" }
-                        - match: { path: "/jaeger" }
-                          redirect: { path_redirect: "/jaeger/" }
-                        - match: { prefix: "/jaeger/" }
-                          route: { cluster: jaeger }
-                        - match: { path: "/grafana" }
-                          redirect: { path_redirect: "/grafana/" }
-                        - match: { prefix: "/grafana/" }
-                          route: { cluster: grafana }
                         - match: { path: "/telemetry" }
                           redirect: { path_redirect: "/telemetry/" }
                         - match: { prefix: "/telemetry/" }
@@ -65,10 +57,6 @@ static_resources:
                             prefix_rewrite: "/"
                             upgrade_configs:
                               - upgrade_type: websocket
-                        - match: { path: "/profiles" }
-                          redirect: { path_redirect: "/profiles/" }
-                        - match: { prefix: "/profiles/" }
-                          route: { cluster: profiles }
                         - match: { prefix: "/" }  # Default/catch-all route - keep last since prefix:"/" matches everything
                           route: { cluster: frontend }
                 http_filters:
@@ -226,30 +214,6 @@ static_resources:
                     socket_address:
                       address: ${LOCUST_WEB_HOST}
                       port_value: ${LOCUST_WEB_PORT}
-    - name: grafana
-      type: STRICT_DNS
-      lb_policy: ROUND_ROBIN
-      load_assignment:
-        cluster_name: grafana
-        endpoints:
-          - lb_endpoints:
-              - endpoint:
-                  address:
-                    socket_address:
-                      address: ${GRAFANA_HOST}
-                      port_value: ${GRAFANA_PORT}
-    - name: jaeger
-      type: STRICT_DNS
-      lb_policy: ROUND_ROBIN
-      load_assignment:
-        cluster_name: jaeger
-        endpoints:
-          - lb_endpoints:
-              - endpoint:
-                  address:
-                    socket_address:
-                      address: ${JAEGER_HOST}
-                      port_value: ${JAEGER_UI_PORT}
     - name: telemetry-docs
       type: STRICT_DNS
       lb_policy: ROUND_ROBIN
@@ -262,18 +226,6 @@ static_resources:
                     socket_address:
                       address: ${TELEMETRY_DOCS_HOST}
                       port_value: ${TELEMETRY_DOCS_PORT}
-    - name: profiles
-      type: STRICT_DNS
-      lb_policy: ROUND_ROBIN
-      load_assignment:
-        cluster_name: profiles
-        endpoints:
-          - lb_endpoints:
-              - endpoint:
-                  address:
-                    socket_address:
-                      address: ${FIREPIT_HOST}
-                      port_value: ${FIREPIT_PORT}
 admin:
   address:
     socket_address:
