@@ -185,9 +185,23 @@ check-clean-work-tree:
 	  exit 1; \
 	fi
 
+# Generate protobuf stubs only when they are missing, so a fresh checkout can
+# build from source. The canonical stub set matches the "clean" target above.
+.PHONY: ensure-protos
+ensure-protos:
+	@if [ ! -f src/checkout/genproto/oteldemo/demo.pb.go ] || \
+	    [ ! -f src/product-catalog/genproto/oteldemo/demo.pb.go ] || \
+	    [ ! -f src/recommendation/demo_pb2.py ] || \
+	    [ ! -f src/frontend/protos/demo.ts ]; then \
+	  echo; \
+	  echo 'Generated protobuf stubs missing; running "make docker-generate-protobuf"...'; \
+	  echo; \
+	  $(MAKE) docker-generate-protobuf; \
+	fi
+
 .PHONY: start
-start:
-	$(DOCKER_COMPOSE_CMD) $(DOCKER_COMPOSE_ENV) up --force-recreate --remove-orphans --detach
+start: ensure-protos
+	$(DOCKER_COMPOSE_CMD) $(DOCKER_COMPOSE_ENV) up --build --force-recreate --remove-orphans --detach
 	@echo ""
 	@echo "OpenTelemetry Demo is running."
 	@echo "Go to http://localhost:8080 for the demo UI."
