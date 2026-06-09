@@ -199,6 +199,7 @@ processors:
 
 connectors:
   span_metrics:
+    aggregation_temporality: "AGGREGATION_TEMPORALITY_DELTA"
 
 service:
   pipelines:
