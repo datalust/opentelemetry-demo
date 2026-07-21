@@ -871,7 +871,7 @@ services:
 
   # Seq
   seq:
-    image: datalust/seq:preview
+    image: datalust/seq:2026.1
     container_name: seq
     restart: unless-stopped
     ports:
